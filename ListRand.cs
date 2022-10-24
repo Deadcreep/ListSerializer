@@ -19,7 +19,7 @@ namespace ListSerializer
 
 		public int Count;
 
-		public void Serialize(FileStream s)
+		public virtual void Serialize(FileStream s)
 		{
 			unsafe
 			{
@@ -50,6 +50,7 @@ namespace ListSerializer
 				node = this.Head;
 				for (int i = 0; i < this.Count; i++)
 				{
+					
 					TypedReference tr = __makeref(node);
 					IntPtr ptr = **(IntPtr**)(&tr);
 
@@ -63,14 +64,13 @@ namespace ListSerializer
 						else
 						{
 							TypedReference trRand = __makeref(node.Rand);
-							IntPtr ptrRand = **(IntPtr**)(&trRand);
+							IntPtr ptrRand = **(IntPtr**)(&trRand);							
 							indexOfRand = dict[ptrRand].index;
 						}
 					}
 					var bIndexOfRand = BitConverter.GetBytes(indexOfRand);
 
 					p = MovePointer(p, bIndexOfRand);
-
 					var info = dict[ptr];
 					var bData = info.data;
 					var bLength = BitConverter.GetBytes(bData.Length);
@@ -97,7 +97,7 @@ namespace ListSerializer
 			}
 		}
 
-		public void Deserialize(FileStream s)
+		public virtual void Deserialize(FileStream s)
 		{
 			int INT_SIZE = 4;
 			var bCount = new byte[INT_SIZE];
@@ -140,7 +140,6 @@ namespace ListSerializer
 			this.Tail = list[list.Count - 1];
 			this.Tail.Rand = indeces[list.Count - 1] != -1 ? list[indeces[list.Count - 1]] : null;
 			this.Tail.Prev = list[list.Count - 2];
-
 		}
 	}
 }

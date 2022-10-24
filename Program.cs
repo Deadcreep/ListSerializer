@@ -1,5 +1,4 @@
 ﻿using BenchmarkDotNet.Running;
-using Microsoft.Diagnostics.Tracing.Parsers.AspNet;
 
 namespace ListSerializer
 {
@@ -9,13 +8,34 @@ namespace ListSerializer
 
 		private static void Main()
 		{
-			//var summary = BenchmarkRunner.Run<Benchmark>();
-			var listRand = Initialize(10, true);
-			FileStream s = new FileStream(FilePath, FileMode.OpenOrCreate);
+			var summary = BenchmarkRunner.Run<Benchmark>();			
+			//ManualTest();			
+		}
+
+		private static void ManualTest()
+		{
+			using FileStream s = new FileStream(FilePath, FileMode.OpenOrCreate);
+
+			s.Position = 0;
+			var listRand = new ListRandNodeKey();
+			Initialize(listRand, 10, true);
 			listRand.Serialize(s);
 			s.Position = 0;
 			var newList = new ListRand();
 			newList.Deserialize(s);
+			
+			Console.WriteLine(" print origin " + listRand.Head.Data + " ;" + listRand.Count);
+
+			foreach (var item in EnumerateNodes(listRand.Head))
+			{
+				PrintData(item);
+			}
+			Console.WriteLine(Environment.NewLine);
+			Console.WriteLine(" print child " + newList.Head.Data + " ; " + newList.Count);
+			foreach (var item in EnumerateNodes(newList.Head))
+			{
+				PrintData(item);
+			}
 		}
 
 		private static void PrintData(ListNode node)
@@ -26,7 +46,7 @@ namespace ListSerializer
 								$"random data: {node.Rand?.Data};");
 		}
 
-		public static ListRand Initialize(int count, bool fixedDataLength)
+		public static ListRand Initialize(ListRand listRand, int count, bool fixedDataLength)
 		{
 			Random random = new Random();
 			var head = new ListNode()
@@ -37,13 +57,10 @@ namespace ListSerializer
 			{
 				Data = "TailNode"
 			};
-			ListRand listRand = new ListRand()
-			{
-				Count = count,
-				Head = head,
-				Tail = tail
-			};
 			ListNode lastNode = head;
+			listRand.Head = head;
+			listRand.Tail = tail;
+			listRand.Count = count;
 			var list = new List<ListNode>(count);
 			list.Add(head);
 			for (int i = 1; i < count - 1; i++)
